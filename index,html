@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator Pensie IPC</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --red: #c0392b;
+    --red-light: #e74c3c;
+    --red-dark: #922b21;
+    --green: #1e8449;
+    --green-light: #27ae60;
+    --gold: #d4ac0d;
+    --bg: #f5f1eb;
+    --surface: #fffdf9;
+    --surface2: #f0ebe2;
+    --border: #d5ccc0;
+    --text: #1a1209;
+    --text2: #5c4a30;
+    --text3: #8a7560;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  header {
+    background: var(--red);
+    color: white;
+    padding: 20px 24px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(192,57,43,0.4);
+  }
+
+  header h1 {
+    font-size: clamp(1rem, 4vw, 1.35rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  header p {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    margin-top: 4px;
+    font-weight: 300;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 12px 40px;
+  }
+
+  /* Controls panel */
+  .controls {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+
+  .controls h2 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    margin-bottom: 16px;
+  }
+
+  .controls-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  @media (max-width: 480px) {
+    .controls-grid { grid-template-columns: 1fr; }
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field-group label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .field-group input {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text);
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .field-group input:focus {
+    outline: none;
+    border-color: var(--red);
+    background: white;
+  }
+
+  .btn-calc {
+    width: 100%;
+    margin-top: 16px;
+    padding: 14px;
+    background: var(--red);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-calc:hover { background: var(--red-dark); }
+  .btn-calc:active { transform: scale(0.98); }
+
+  /* Results panel */
+  .results {
+    display: none;
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-lg);
+    border: 2px solid var(--green);
+  }
+
+  .results.visible { display: block; }
+
+  .results h2 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--green);
+    margin-bottom: 16px;
+  }
+
+  .result-steps {
+    display: grid;
+    gap: 12px;
+  }
+
+  .step-card {
+    background: var(--surface2);
+    border-radius: 12px;
+    padding: 14px 16px;
+    border-left: 4px solid var(--red);
+  }
+
+  .step-card.green { border-left-color: var(--green); }
+  .step-card.gold { border-left-color: var(--gold); }
+
+  .step-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    margin-bottom: 4px;
+  }
+
+  .step-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .step-sub {
+    font-size: 0.75rem;
+    color: var(--text3);
+    margin-top: 3px;
+  }
+
+  .pensie-neta {
+    background: var(--green);
+    border-radius: 14px;
+    padding: 18px 20px;
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  .pensie-neta .label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 4px;
+  }
+
+  .pensie-neta .value {
+    font-family: 'DM Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .period-tag {
+    display: inline-block;
+    background: rgba(192,57,43,0.12);
+    color: var(--red);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-top: 6px;
+  }
+
+  /* Table section */
+  .table-section {
+    background: var(--surface);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+
+  .table-header {
+    background: var(--red);
+    color: white;
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .table-header h2 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .table-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .btn-sm {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 2px solid rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .btn-sm:hover { background: rgba(255,255,255,0.25); }
+
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 420px;
+  }
+
+  thead th {
+    background: var(--surface2);
+    padding: 10px 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text2);
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+  }
+
+  thead th:first-child { text-align: left; border-radius: 0; }
+  thead th:not(:first-child) { text-align: right; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:hover { background: rgba(192,57,43,0.04); }
+
+  tbody tr.selected-month {
+    background: rgba(30, 132, 73, 0.1) !important;
+    border-bottom-color: rgba(30, 132, 73, 0.25);
+  }
+
+  tbody tr.selected-month td { color: var(--green-light); font-weight: 600; }
+  tbody tr.selected-month td:first-child { color: var(--green); }
+
+  tbody td {
+    padding: 9px 12px;
+    font-size: 0.82rem;
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  tbody td:first-child {
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--text2);
+    min-width: 120px;
+  }
+
+  tbody td:not(:first-child) { text-align: right; }
+
+  .td-ipc {
+    color: var(--red-light) !important;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+  }
+
+  input.cell-input {
+    border: none;
+    background: transparent;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--text);
+    text-align: right;
+    width: 100%;
+    min-width: 70px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+
+  input.cell-input:focus {
+    outline: none;
+    background: rgba(192,57,43,0.08);
+    box-shadow: 0 0 0 2px rgba(192,57,43,0.3);
+  }
+
+  .indexed-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text3);
+  }
+
+  .indexed-val.has-value { color: var(--text); font-weight: 600; }
+
+  .year-divider td {
+    background: var(--red) !important;
+    color: white !important;
+    font-weight: 700 !important;
+    font-size: 0.72rem !important;
+    text-align: center !important;
+    padding: 5px 12px !important;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* Tooltip for selected months badge */
+  .badge-best {
+    display: inline-block;
+    background: var(--green);
+    color: white;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    margin-left: 6px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .info-tip {
+    font-size: 0.7rem;
+    color: var(--text3);
+    padding: 10px 20px;
+    border-top: 1px solid var(--border);
+    font-style: italic;
+  }
+
+  /* Mobile touch scrollbar hint */
+  .scroll-hint {
+    text-align: center;
+    font-size: 0.68rem;
+    color: var(--text3);
+    padding: 8px;
+    display: none;
+  }
+  @media (max-width: 600px) {
+    .scroll-hint { display: block; }
+  }
+
+  /* Floating calculate fab */
+  .fab-calc {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    right: 20px;
+    z-index: 200;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 22px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(30,132,73,0.45);
+    transition: transform 0.15s, background 0.2s;
+  }
+  .fab-calc:active { transform: scale(0.95); }
+  @media (max-width: 700px) {
+    .fab-calc { display: block; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📊 Calculator Pensie — Metodă IPC</h1>
+  <p>Indexare salarii brute · Selectare luni favorabile · Calcul pensie netă</p>
+</header>
+
+<div class="container">
+
+  <!-- Controls -->
+  <div class="controls">
+    <h2>⚙️ Parametri calcul</h2>
+    <div class="controls-grid">
+      <div class="field-group">
+        <label>Număr luni bază de calcul</label>
+        <input type="number" id="numLuni" value="16" min="1" max="60" placeholder="ex: 16">
+      </div>
+      <div class="field-group">
+        <label>Procent pensie (%)</label>
+        <input type="number" id="procent" value="58.5" step="0.01" min="0" max="100" placeholder="58.5">
+      </div>
+    </div>
+    <button class="btn-calc" onclick="calculeaza()">🔢 Calculează Pensia</button>
+  </div>
+
+  <!-- Results -->
+  <div class="results" id="results">
+    <h2>✅ Rezultate calcul</h2>
+    <div class="result-steps">
+      <div class="step-card">
+        <div class="step-label">Pasul 4 — Perioadă selectată (luni consecutive cu medie maximă)</div>
+        <div class="step-value" id="res-perioada">—</div>
+        <div class="step-sub" id="res-suma">—</div>
+      </div>
+      <div class="step-card green">
+        <div class="step-label">Pasul 5 — Baza de calcul (suma ÷ nr. luni)</div>
+        <div class="step-value" id="res-baza">—</div>
+        <div class="step-sub" id="res-formula">—</div>
+      </div>
+      <div class="pensie-neta">
+        <div class="label">Pensie Netă</div>
+        <div class="value" id="res-pensie">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-section">
+    <div class="table-header">
+      <h2>📋 Tabel Salarii & Indici IPC</h2>
+      <div class="table-actions">
+        <button class="btn-sm" onclick="stergeToateSalariile()">🗑 Șterge salarii</button>
+        <button class="btn-sm" onclick="precompletaDate()">📥 Test date</button>
+      </div>
+    </div>
+    <div class="scroll-hint">← Glisați tabelul orizontal →</div>
+    <div class="table-wrap">
+      <table id="mainTable">
+        <thead>
+          <tr>
+            <th>Luna</th>
+            <th>IPC</th>
+            <th>Total Brut Realizat</th>
+            <th>Salariu Indexat</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+      </table>
+    </div>
+    <div class="info-tip">💡 Câmpurile IPC sunt pre-completate până în apr. 2026 și editabile. Salariul indexat se calculează automat la introducerea datelor.</div>
+  </div>
+
+</div>
+
+<button class="fab-calc" onclick="calculeaza()">🔢 Calculează</button>
+
+<script>
+// ────────────────────────────────────────────────────────
+// DATE IPC precompletate (conform imaginilor furnizate)
+// ────────────────────────────────────────────────────────
+const IPC_DATA = {
+  '2024-01': 116.64,
+  '2024-02': 115.7,
+  '2024-03': 115.21,
+  '2024-04': 115.12,
+  '2024-05': 115.24,
+  '2024-06': 114.97,
+  '2024-07': 114.27,
+  '2024-08': 114.01,
+  '2024-09': 113.63,
+  '2024-10': 112.94,
+  '2024-11': 112.48,
+  '2024-12': 112.15,
+  '2025-01': 111.14,
+  '2025-02': 110.17,
+  '2025-03': 109.87,
+  '2025-04': 109.79,
+  '2025-05': 109.29,
+  '2025-06': 108.81,
+  '2025-07': 105.96,
+  '2025-08': 103.78,
+  '2025-09': 103.41,
+  '2025-10': 102.9,
+  '2025-11': 102.47,
+  '2025-12': 102.25,
+  '2026-01': 101.38,
+  '2026-02': 100.78,
+  '2026-03': 100,
+  '2026-04': 100,
+};
+
+// Date de test (Total Brut Realizat) din imagini
+const TEST_BRUT = {
+  '2024-01': 8064,
+  '2024-02': 8234,
+  '2024-03': 8433,
+  '2024-04': 9620,
+  '2024-05': 9600,
+  '2024-06': 10556,
+  '2024-07': 10830,
+  '2024-08': 10560,
+  '2024-09': 12080,
+  '2024-10': 11240,
+  '2024-11': 11774,
+  '2024-12': 12424,
+  '2025-01': 10436,
+  '2025-02': 11576,
+  '2025-03': 12275,
+  '2025-04': 9854,
+  '2025-05': 10903,
+  '2025-06': 12328,
+  '2025-07': 11624,
+  '2025-08': 12208,
+  '2025-09': 11379,
+  '2025-10': 11644,
+  '2025-11': 12174,
+  '2025-12': 12338,
+  '2026-01': 12236,
+  '2026-02': 11568,
+  '2026-03': 11671,
+};
+
+const LUNI_RO = ['ianuarie','februarie','martie','aprilie','mai','iunie',
+                  'iulie','august','septembrie','octombrie','noiembrie','decembrie'];
+
+// Generăm toate lunile 2024-ian → 2030-dec
+function genereazaLuni() {
+  const luni = [];
+  for (let an = 2024; an <= 2030; an++) {
+    for (let l = 1; l <= 12; l++) {
+      const key = `${an}-${String(l).padStart(2,'0')}`;
+      luni.push(key);
+    }
+  }
+  return luni;
+}
+
+const TOATE_LUNILE = genereazaLuni();
+
+// State: salariile brute introduse de user
+const brutValues = {};
+const ipcValues = {};
+
+function buildTable() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  let currentYear = null;
+
+  TOATE_LUNILE.forEach(key => {
+    const [an, luna] = key.split('-');
+    const anInt = parseInt(an);
+    const lunaInt = parseInt(luna);
+
+    if (anInt !== currentYear) {
+      currentYear = anInt;
+      const divRow = document.createElement('tr');
+      divRow.className = 'year-divider';
+      divRow.innerHTML = `<td colspan="4">— ${anInt} —</td>`;
+      tbody.appendChild(divRow);
+    }
+
+    const row = document.createElement('tr');
+    row.id = `row-${key}`;
+
+    const ipcDefault = IPC_DATA[key] !== undefined ? IPC_DATA[key] : '';
+    ipcValues[key] = ipcDefault;
+
+    const lunaLabel = `${anInt} — ${LUNI_RO[lunaInt-1]}`;
+
+    row.innerHTML = `
+      <td>${lunaLabel}</td>
+      <td class="td-ipc">
+        <input class="cell-input" type="number" step="0.01" id="ipc-${key}"
+          value="${ipcDefault !== '' ? ipcDefault : ''}"
+          placeholder="—"
+          onchange="onIpcChange('${key}', this.value)"
+          oninput="onIpcChange('${key}', this.value)">
+      </td>
+      <td>
+        <input class="cell-input" type="number" step="1" id="brut-${key}"
+          value="${brutValues[key] || ''}"
+          placeholder="—"
+          onchange="onBrutChange('${key}', this.value)"
+          oninput="onBrutChange('${key}', this.value)">
+      </td>
+      <td>
+        <span class="indexed-val" id="idx-${key}">—</span>
+      </td>
+    `;
+
+    tbody.appendChild(row);
+    // Recalculate indexed if we already have data
+    recalcIndexat(key);
+  });
+}
+
+function onIpcChange(key, val) {
+  const v = parseFloat(val);
+  ipcValues[key] = isNaN(v) ? '' : v;
+  recalcIndexat(key);
+}
+
+function onBrutChange(key, val) {
+  const v = parseFloat(val);
+  brutValues[key] = isNaN(v) ? '' : v;
+  recalcIndexat(key);
+}
+
+function recalcIndexat(key) {
+  const ipc = ipcValues[key];
+  const brut = brutValues[key];
+  const span = document.getElementById(`idx-${key}`);
+  if (!span) return;
+
+  if (ipc !== '' && brut !== '' && !isNaN(ipc) && !isNaN(brut)) {
+    const indexed = (ipc / 100) * brut;
+    span.textContent = formatNum(indexed);
+    span.classList.add('has-value');
+    span.dataset.val = indexed;
+  } else {
+    span.textContent = '—';
+    span.classList.remove('has-value');
+    delete span.dataset.val;
+  }
+}
+
+function formatNum(v) {
+  return v.toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+}
+
+function getIndexedValues() {
+  // Returnează array de { key, val } doar pentru lunile cu valoare indexată
+  return TOATE_LUNILE.map(key => {
+    const span = document.getElementById(`idx-${key}`);
+    if (span && span.dataset.val) {
+      return { key, val: parseFloat(span.dataset.val) };
+    }
+    return null;
+  }).filter(Boolean);
+}
+
+function calculeaza() {
+  const nLuni = parseInt(document.getElementById('numLuni').value) || 16;
+  const procent = parseFloat(document.getElementById('procent').value) || 58.5;
+
+  const indexed = getIndexedValues();
+
+  if (indexed.length < nLuni) {
+    alert(`Aveți doar ${indexed.length} luni cu date complete. Introduceți cel puțin ${nLuni} luni.`);
+    return;
+  }
+
+  // Căutăm cele mai bune N luni CONSECUTIVE cu suma maximă (din ultimele 60 luni)
+  // "ultimele 60 luni" = ultimele 60 din indexed disponibil
+  const subset = indexed.slice(-60);
+
+  if (subset.length < nLuni) {
+    alert(`Nu există suficiente luni cu date în ultimele 60 de luni.`);
+    return;
+  }
+
+  let bestSum = -Infinity;
+  let bestStart = 0;
+
+  for (let i = 0; i <= subset.length - nLuni; i++) {
+    let sum = 0;
+    for (let j = i; j < i + nLuni; j++) sum += subset[j].val;
+    if (sum > bestSum) {
+      bestSum = sum;
+      bestStart = i;
+    }
+  }
+
+  const selectedMonths = subset.slice(bestStart, bestStart + nLuni);
+  const suma = selectedMonths.reduce((a, b) => a + b.val, 0);
+  const baza = suma / nLuni;
+  const pensie = baza * (procent / 100);
+
+  // Highlight în tabel
+  document.querySelectorAll('tbody tr').forEach(r => r.classList.remove('selected-month'));
+  document.querySelectorAll('.badge-best').forEach(b => b.remove());
+
+  selectedMonths.forEach(m => {
+    const row = document.getElementById(`row-${m.key}`);
+    if (row) {
+      row.classList.add('selected-month');
+      const firstTd = row.querySelector('td');
+      if (firstTd && !firstTd.querySelector('.badge-best')) {
+        const badge = document.createElement('span');
+        badge.className = 'badge-best';
+        badge.textContent = '✓';
+        firstTd.appendChild(badge);
+      }
+    }
+  });
+
+  // Scroll la prima lună selectată
+  const firstRow = document.getElementById(`row-${selectedMonths[0].key}`);
+  if (firstRow) firstRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  // Update results
+  const primaLuna = selectedMonths[0].key;
+  const ultimaLuna = selectedMonths[selectedMonths.length - 1].key;
+  const perioadaText = `${formatKey(primaLuna)} → ${formatKey(ultimaLuna)}`;
+
+  document.getElementById('res-perioada').innerHTML =
+    perioadaText + ` <span class="period-tag">${nLuni} luni consecutive</span>`;
+  document.getElementById('res-suma').textContent =
+    `Suma salarii indexate: ${formatNum(suma)} lei`;
+  document.getElementById('res-baza').textContent = formatNum(baza) + ' lei';
+  document.getElementById('res-formula').textContent =
+    `${formatNum(suma)} ÷ ${nLuni} = ${formatNum(baza)}`;
+  document.getElementById('res-pensie').textContent =
+    formatNum(pensie) + ' lei';
+
+  const resultsEl = document.getElementById('results');
+  resultsEl.classList.add('visible');
+  resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function formatKey(key) {
+  const [an, l] = key.split('-');
+  return `${LUNI_RO[parseInt(l)-1]} ${an}`;
+}
+
+function stergeToateSalariile() {
+  if (!confirm('Ștergeți toate salariile brute introduse?')) return;
+  TOATE_LUNILE.forEach(key => {
+    const inp = document.getElementById(`brut-${key}`);
+    if (inp) inp.value = '';
+    delete brutValues[key];
+    recalcIndexat(key);
+    const row = document.getElementById(`row-${key}`);
+    if (row) row.classList.remove('selected-month');
+    const badge = document.querySelectorAll('.badge-best');
+    badge.forEach(b => b.remove());
+  });
+  document.getElementById('results').classList.remove('visible');
+}
+
+function precompletaDate() {
+  Object.entries(TEST_BRUT).forEach(([key, val]) => {
+    brutValues[key] = val;
+    const inp = document.getElementById(`brut-${key}`);
+    if (inp) inp.value = val;
+    recalcIndexat(key);
+  });
+}
+
+// Init
+buildTable();
+// Pre-completăm cu datele de test
+precompletaDate();
+</script>
+</body>
+</html>
