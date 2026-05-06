@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Calculator Pensie</title>
+    <title>Calculator Pensie IPC</title>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap");
 
@@ -66,7 +66,7 @@
       }
 
       .container {
-        max-width: 900px;
+        max-width: 1000px;
         margin: 0 auto;
         padding: 20px 12px 100px;
       }
@@ -474,16 +474,16 @@
       table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 420px;
+        min-width: 560px;
       }
 
       thead th {
         background: var(--surface2);
-        padding: 10px 12px;
-        font-size: 0.72rem;
+        padding: 10px 10px;
+        font-size: 0.68rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.07em;
+        letter-spacing: 0.06em;
         color: var(--text2);
         border-bottom: 2px solid var(--border);
         white-space: nowrap;
@@ -496,6 +496,17 @@
       }
       thead th:not(:first-child) {
         text-align: right;
+      }
+
+      /* Sub-header for IPC group */
+      thead tr.th-group th {
+        font-size: 0.62rem;
+        padding: 4px 10px 6px;
+        background: #e8e1d8;
+        color: var(--text3);
+        letter-spacing: 0.04em;
+        font-weight: 600;
+        border-bottom: 1px solid var(--border);
       }
 
       tbody tr {
@@ -521,8 +532,8 @@
       }
 
       tbody td {
-        padding: 9px 12px;
-        font-size: 0.82rem;
+        padding: 8px 10px;
+        font-size: 0.8rem;
         color: var(--text);
         vertical-align: middle;
       }
@@ -538,21 +549,37 @@
         text-align: right;
       }
 
-      .td-ipc {
+      .td-ipc-lunar {
         color: var(--red-light) !important;
         font-family: "DM Mono", monospace;
-        font-size: 0.78rem;
+        font-size: 0.75rem;
+        border-right: 1px dashed var(--border);
+      }
+
+      .td-ipc-cumul {
+        color: var(--blue) !important;
+        font-family: "DM Mono", monospace;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: rgba(41, 128, 185, 0.04);
+        border-right: 2px solid rgba(41, 128, 185, 0.2);
+      }
+
+      .td-ipc-cumul.no-ipc {
+        color: var(--text3) !important;
+        font-weight: 400;
+        background: transparent;
       }
 
       input.cell-input {
         border: none;
         background: transparent;
         font-family: "DM Mono", monospace;
-        font-size: 0.82rem;
+        font-size: 0.8rem;
         color: var(--text);
         text-align: right;
         width: 100%;
-        min-width: 70px;
+        min-width: 60px;
         padding: 2px 4px;
         border-radius: 4px;
         transition:
@@ -608,6 +635,7 @@
         padding: 10px 20px;
         border-top: 1px solid var(--border);
         font-style: italic;
+        line-height: 1.5;
       }
 
       .scroll-hint {
@@ -750,14 +778,26 @@
       .btn-modal-confirm:hover {
         background: var(--blue);
       }
+
+      /* IPC info box */
+      .ipc-ref-box {
+        background: rgba(41, 128, 185, 0.07);
+        border: 1px solid rgba(41, 128, 185, 0.2);
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-bottom: 16px;
+        font-size: 0.75rem;
+        color: var(--blue);
+        line-height: 1.5;
+      }
+      .ipc-ref-box strong {
+        font-weight: 700;
+      }
     </style>
   </head>
   <body>
     <header>
       <h1>📊 Calculator Pensie</h1>
-      <p>
-        Indexare salarii brute · Selectare luni favorabile · Calcul pensie netă
-      </p>
     </header>
 
     <div class="container">
@@ -805,7 +845,7 @@
           <input
             type="text"
             id="profileNameInput"
-            placeholder="Nume profil (ex: Nume Prenume)"
+            placeholder="Nume profil (ex: Ion Popescu)"
             maxlength="60"
             onkeydown="if (event.key === 'Enter') openSaveModal();"
           />
@@ -842,7 +882,8 @@
         <div class="result-steps">
           <div class="step-card">
             <div class="step-label">
-              Pasul 4 — Perioadă selectată (luni consecutive cu medie maximă)
+              Pasul 4 — Perioadă selectată (luni consecutive cu medie maximă a
+              salariului indexat)
             </div>
             <div class="step-value" id="res-perioada">—</div>
             <div class="step-sub" id="res-suma">—</div>
@@ -876,16 +917,54 @@
           <table id="mainTable">
             <thead>
               <tr>
-                <th>Luna</th>
-                <th>IPC</th>
-                <th>Total Brut Realizat</th>
-                <th>Salariu Indexat</th>
+                <th rowspan="2" style="vertical-align: bottom">Luna</th>
+                <th
+                  style="
+                    text-align: center;
+                    border-bottom: 1px solid var(--border);
+                    padding-bottom: 4px;
+                  "
+                  colspan="2"
+                >
+                  Indice Prețuri Consum (IPC) — sursa INS
+                </th>
+                <th rowspan="2" style="vertical-align: bottom">
+                  Total Brut<br />Realizat (lei)
+                </th>
+                <th rowspan="2" style="vertical-align: bottom">
+                  Salariu Indexat<br />(lei)
+                </th>
+              </tr>
+              <tr class="th-group">
+                <th>
+                  IPC Lunar<br />(L/L-1, %)<br /><span
+                    style="font-weight: 400; color: var(--red-light)"
+                    >editabil</span
+                  >
+                </th>
+                <th>
+                  IPC Cumulat<br />(față de azi)<br /><span
+                    style="font-weight: 400; color: var(--blue)"
+                    >auto-calculat</span
+                  >
+                </th>
               </tr>
             </thead>
             <tbody id="tableBody"></tbody>
           </table>
         </div>
-        <div class="info-tip"></div>
+        <div class="info-tip">
+          💡 <strong>IPC Lunar</strong> = indicele lunar publicat de INS (L față
+          de L-1), pre-completat din datele INS până în mart. 2026. Se poate
+          edita și completa manual pentru lunile viitoare, pe măsura publicării
+          de INS.<br />
+          📐 <strong>IPC Cumulat</strong> = produsul în lanț al tuturor
+          indicilor lunari de la luna respectivă până la ultima lună cu IPC
+          disponibil (data interogării) — acesta este factorul corect de
+          actualizare conform Legii 223/2015 și normelor MAI.<br />
+          💰 <strong>Salariu Indexat</strong> = Total Brut Realizat × IPC
+          Cumulat (împărțit la 100).
+        </div>
       </div>
     </div>
 
@@ -906,7 +985,7 @@
         <input
           type="text"
           id="modalProfileName"
-          placeholder="ex: Nume Prenume"
+          placeholder="ex: Ion Popescu"
           maxlength="60"
           onkeydown="if (event.key === 'Enter') confirmSave();"
         />
@@ -922,38 +1001,41 @@
     </div>
 
     <script>
-      // ─────────────────────────────────────────────────────
-      // IPC DATA (pre-filled up to apr 2026)
-      // ─────────────────────────────────────────────────────
-      const IPC_DATA = {
-        "2024-01": 116.64,
-        "2024-02": 115.7,
-        "2024-03": 115.21,
-        "2024-04": 115.12,
-        "2024-05": 115.24,
-        "2024-06": 114.97,
-        "2024-07": 114.27,
-        "2024-08": 114.01,
-        "2024-09": 113.63,
-        "2024-10": 112.94,
-        "2024-11": 112.48,
-        "2024-12": 112.15,
-        "2025-01": 111.14,
-        "2025-02": 110.17,
-        "2025-03": 109.87,
-        "2025-04": 109.79,
-        "2025-05": 109.29,
-        "2025-06": 108.81,
-        "2025-07": 105.96,
-        "2025-08": 103.78,
-        "2025-09": 103.41,
-        "2025-10": 102.9,
-        "2025-11": 102.47,
-        "2025-12": 102.25,
-        "2026-01": 101.38,
-        "2026-02": 100.78,
-        "2026-03": 100,
-        "2026-04": 100,
+      // ═══════════════════════════════════════════════════════════════
+      // IPC LUNAR DATE — sursa INS Romania (L față de L-1, %)
+      // Pre-completate conform comunicatelor de presă INS.
+      // Adăugați manual lunile viitoare la apariția comunicatelor INS.
+      // ═══════════════════════════════════════════════════════════════
+      const IPC_LUNAR_DATA = {
+        "2024-01": 100.3,
+        "2024-02": 100.81,
+        "2024-03": 100.2,
+        "2024-04": 100.07,
+        "2024-05": 100.46,
+        "2024-06": 100.3,
+        "2024-07": 100.58,
+        "2024-08": 100.53,
+        "2024-09": 100.8,
+        "2024-10": 100.73,
+        "2024-11": 100.67,
+        "2024-12": 100.44,
+        "2025-01": 100.92,
+        "2025-02": 100.88,
+        "2025-03": 100.5,
+        "2025-04": 100.35,
+        "2025-05": 100.46,
+        "2025-06": 100.45,
+        "2025-07": 102.68,
+        "2025-08": 100.4,
+        "2025-09": 100.36,
+        "2025-10": 100.3,
+        "2025-11": 100.2,
+        "2025-12": 100.22,
+        "2026-01": 100.86,
+        "2026-02": 100.7,
+        "2026-03": 100.65,
+        // Adăugați aici lunile viitoare după publicare INS:
+        // '2026-04': 100.xx,
       };
 
       const LUNI_RO = [
@@ -987,8 +1069,103 @@
 
       const TOATE_LUNILE = genereazaLuni();
       const brutValues = {};
-      const ipcValues = {};
+      const ipcLunarValues = {}; // IPC lunar (L/L-1) pentru fiecare lună — editabil
       let activeProfileName = null;
+
+      // ═══════════════════════════════════════════════════════════════
+      // IPC CUMULAT — produs în lanț (conform reguli.txt și Legea 223)
+      //
+      // Logică: pentru luna X, IPC cumulat față de "data interogării"
+      // = produsul coeficienților IPC lunari din luna X+1 până la
+      // ultima lună pentru care există IPC în tabel.
+      //
+      // Exemplu: salariul din ian-2025, ultima lună cu IPC = mart-2026:
+      //   IPC_cumul(ian-2025) = IPC(feb-2025) × IPC(mar-2025) × ... × IPC(mar-2026)
+      //   Toți împărțiți la 100 => coeficienți zecimali, rezultat ×100 pentru %
+      //
+      // Luna curentă (ultima cu IPC) are IPC cumulat = 100.0000 (factor 1)
+      // ═══════════════════════════════════════════════════════════════
+
+      // Returnează sortată lista de chei cu IPC lunar disponibil
+      function getKeysWithIpc() {
+        return TOATE_LUNILE.filter((k) => {
+          const v = ipcLunarValues[k];
+          return v !== "" && v !== undefined && !isNaN(v) && v > 0;
+        });
+      }
+
+      // Calculează IPC cumulat pentru toate lunile și returnează un map key→ipcCumulat(%)
+      function calcIpcCumulat() {
+        const keysWithIpc = getKeysWithIpc();
+        const result = {};
+
+        if (keysWithIpc.length === 0) return result;
+
+        // Ultima lună cu IPC = luna de referință (simulează "data interogării")
+        const lastKey = keysWithIpc[keysWithIpc.length - 1];
+
+        // Construim array de indici pentru toate lunile din TOATE_LUNILE care au IPC
+        // Indexul fiecărei chei în TOATE_LUNILE
+        const keyIndex = {};
+        TOATE_LUNILE.forEach((k, i) => {
+          keyIndex[k] = i;
+        });
+
+        const lastIdx = keyIndex[lastKey];
+
+        // Pentru fiecare lună cu IPC, calculăm produsul cumulat
+        // din luna URMĂTOARE ei până la lastKey (inclusiv)
+        keysWithIpc.forEach((key) => {
+          const idx = keyIndex[key];
+
+          if (idx === lastIdx) {
+            // Ultima lună cu IPC: factor cumulat = 1 (100%)
+            result[key] = 100.0;
+            return;
+          }
+
+          // Produsul coeficienților din luna idx+1 până la lastIdx (inclusiv)
+          let prod = 1.0;
+          for (let i = idx + 1; i <= lastIdx; i++) {
+            const k = TOATE_LUNILE[i];
+            const v = ipcLunarValues[k];
+            if (v !== "" && v !== undefined && !isNaN(v) && v > 0) {
+              prod *= v / 100.0;
+            }
+            // Dacă o lună intermediară nu are IPC, o sărim (lanțul rămâne incomplet)
+          }
+          // Întoarcem ca procent (×100)
+          result[key] = parseFloat((prod * 100).toFixed(6));
+        });
+
+        // Lunile fără IPC nu primesc valoare
+        return result;
+      }
+
+      // Map global care se recalculează la orice modificare IPC lunar
+      let ipcCumulatMap = {};
+
+      function recalcToateCumulate() {
+        ipcCumulatMap = calcIpcCumulat();
+        // Actualizează afișarea IPC cumulat și salariu indexat pentru toate lunile
+        TOATE_LUNILE.forEach((key) => {
+          updateCumulCell(key);
+          recalcIndexat(key);
+        });
+      }
+
+      function updateCumulCell(key) {
+        const cell = document.getElementById(`cumul-${key}`);
+        if (!cell) return;
+        const val = ipcCumulatMap[key];
+        if (val !== undefined) {
+          cell.textContent = val.toFixed(4) + "%";
+          cell.classList.remove("no-ipc");
+        } else {
+          cell.textContent = "—";
+          cell.classList.add("no-ipc");
+        }
+      }
 
       // ─────────────────────────────────────────────────────
       // BUILD TABLE
@@ -1007,27 +1184,29 @@
             currentYear = anInt;
             const divRow = document.createElement("tr");
             divRow.className = "year-divider";
-            divRow.innerHTML = `<td colspan="4">— ${anInt} —</td>`;
+            divRow.innerHTML = `<td colspan="5">— ${anInt} —</td>`;
             tbody.appendChild(divRow);
           }
 
           const row = document.createElement("tr");
           row.id = `row-${key}`;
 
-          const ipcDefault = IPC_DATA[key] !== undefined ? IPC_DATA[key] : "";
-          ipcValues[key] = ipcDefault;
+          const ipcDefault =
+            IPC_LUNAR_DATA[key] !== undefined ? IPC_LUNAR_DATA[key] : "";
+          ipcLunarValues[key] = ipcDefault !== "" ? ipcDefault : "";
 
           const lunaLabel = `${anInt} — ${LUNI_RO[lunaInt - 1]}`;
 
           row.innerHTML = `
       <td>${lunaLabel}</td>
-      <td class="td-ipc">
+      <td class="td-ipc-lunar">
         <input class="cell-input" type="number" step="0.01" id="ipc-${key}"
           value="${ipcDefault !== "" ? ipcDefault : ""}"
           placeholder="—"
-          onchange="onIpcChange('${key}', this.value)"
-          oninput="onIpcChange('${key}', this.value)">
+          onchange="onIpcLunarChange('${key}', this.value)"
+          oninput="onIpcLunarChange('${key}', this.value)">
       </td>
+      <td class="td-ipc-cumul no-ipc" id="cumul-${key}">—</td>
       <td>
         <input class="cell-input" type="number" step="1" id="brut-${key}"
           value=""
@@ -1041,17 +1220,20 @@
     `;
 
           tbody.appendChild(row);
-          recalcIndexat(key);
         });
+
+        // Calculează IPC cumulat inițial după ce toate rândurile sunt create
+        recalcToateCumulate();
       }
 
       // ─────────────────────────────────────────────────────
       // CELL HANDLERS
       // ─────────────────────────────────────────────────────
-      function onIpcChange(key, val) {
+      function onIpcLunarChange(key, val) {
         const v = parseFloat(val);
-        ipcValues[key] = isNaN(v) ? "" : v;
-        recalcIndexat(key);
+        ipcLunarValues[key] = isNaN(v) ? "" : v;
+        // Orice modificare IPC lunar recalculează TOATE cumulatele și indexările
+        recalcToateCumulate();
       }
 
       function onBrutChange(key, val) {
@@ -1060,14 +1242,22 @@
         recalcIndexat(key);
       }
 
+      // Recalculează salariul indexat pentru o singură lună
+      // folosind IPC Cumulat (produsul în lanț) — nu IPC lunar individual
       function recalcIndexat(key) {
-        const ipc = ipcValues[key];
         const brut = brutValues[key];
+        const ipcC = ipcCumulatMap[key]; // IPC cumulat în % (ex: 108.52)
         const span = document.getElementById(`idx-${key}`);
         if (!span) return;
 
-        if (ipc !== "" && brut !== "" && !isNaN(ipc) && !isNaN(brut)) {
-          const indexed = (ipc / 100) * brut;
+        if (
+          brut !== undefined &&
+          brut !== "" &&
+          !isNaN(brut) &&
+          ipcC !== undefined &&
+          !isNaN(ipcC)
+        ) {
+          const indexed = brut * (ipcC / 100.0);
           span.textContent = formatNum(indexed);
           span.classList.add("has-value");
           span.dataset.val = indexed;
@@ -1165,10 +1355,17 @@
         const primaLuna = selectedMonths[0].key;
         const ultimaLuna = selectedMonths[selectedMonths.length - 1].key;
 
+        // Info despre luna de referință IPC
+        const keysWithIpc = getKeysWithIpc();
+        const lunaRefIpc =
+          keysWithIpc.length > 0
+            ? ` · Referință IPC: ${formatKey(keysWithIpc[keysWithIpc.length - 1])}`
+            : "";
+
         document.getElementById("res-perioada").innerHTML =
-          `${formatKey(primaLuna)} → ${formatKey(ultimaLuna)} <span class="period-tag">${nLuni} luni consecutive</span>`;
+          `${formatKey(primaLuna)} → ${formatKey(ultimaLuna)} <span class="period-tag">${nLuni} luni consecutive${lunaRefIpc}</span>`;
         document.getElementById("res-suma").textContent =
-          `Suma salarii indexate: ${formatNum(suma)} lei`;
+          `Suma salarii indexate (cumulate IPC): ${formatNum(suma)} lei`;
         document.getElementById("res-baza").textContent =
           `${formatNum(baza)} lei`;
         document.getElementById("res-formula").textContent =
