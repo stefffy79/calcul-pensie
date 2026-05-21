@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Calculator Pensie IPC</title>
+    <title>Calculator Pensie</title>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap");
 
@@ -160,7 +160,6 @@
         transform: scale(0.98);
       }
 
-      /* Profile panel */
       .profile-panel {
         background: var(--surface);
         border-radius: 16px;
@@ -319,7 +318,6 @@
         color: var(--blue);
       }
 
-      /* Results panel */
       .results {
         display: none;
         background: var(--surface);
@@ -416,7 +414,6 @@
         margin-top: 6px;
       }
 
-      /* Table section */
       .table-section {
         background: var(--surface);
         border-radius: 16px;
@@ -680,7 +677,6 @@
         }
       }
 
-      /* Modal */
       .modal-overlay {
         display: none;
         position: fixed;
@@ -779,7 +775,6 @@
         background: var(--blue);
       }
 
-      /* IPC info box */
       .ipc-ref-box {
         background: rgba(41, 128, 185, 0.07);
         border: 1px solid rgba(41, 128, 185, 0.2);
@@ -801,7 +796,6 @@
     </header>
 
     <div class="container">
-      <!-- Controls -->
       <div class="controls">
         <h2>⚙️ Parametri calcul</h2>
         <div class="controls-grid">
@@ -834,18 +828,16 @@
         </button>
       </div>
 
-      <!-- Profile / Storage panel -->
       <div class="profile-panel">
         <h2>💾 Profiluri salvate</h2>
 
         <div id="activeProfileBar" class="active-profile-bar"></div>
 
-        <!-- Save section -->
         <div class="profile-save-row">
           <input
             type="text"
             id="profileNameInput"
-            placeholder="Nume profil (ex: Ion Popescu)"
+            placeholder="Nume profil (Nume Prenume)"
             maxlength="60"
             onkeydown="if (event.key === 'Enter') openSaveModal();"
           />
@@ -856,7 +848,6 @@
 
         <hr class="profile-divider" />
 
-        <!-- Load section -->
         <div class="profile-load-row">
           <select id="profileSelect">
             <option value="">— Selectați un profil salvat —</option>
@@ -876,22 +867,19 @@
         <div id="profileStatus" class="profile-status"></div>
       </div>
 
-      <!-- Results -->
       <div class="results" id="results">
         <h2>✅ Rezultate calcul</h2>
         <div class="result-steps">
           <div class="step-card">
             <div class="step-label">
-              Pasul 4 — Perioadă selectată (luni consecutive cu medie maximă a
-              salariului indexat)
+              Perioadă selectată (luni consecutive cu medie maximă a salariului
+              indexat)
             </div>
             <div class="step-value" id="res-perioada">—</div>
             <div class="step-sub" id="res-suma">—</div>
           </div>
           <div class="step-card green">
-            <div class="step-label">
-              Pasul 5 — Baza de calcul (suma ÷ nr. luni)
-            </div>
+            <div class="step-label">Baza de calcul (suma ÷ nr. luni)</div>
             <div class="step-value" id="res-baza">—</div>
             <div class="step-sub" id="res-formula">—</div>
           </div>
@@ -902,7 +890,6 @@
         </div>
       </div>
 
-      <!-- Table -->
       <div class="table-section">
         <div class="table-header">
           <h2>📋 Tabel Salarii & Indici IPC</h2>
@@ -926,7 +913,7 @@
                   "
                   colspan="2"
                 >
-                  Indice Prețuri Consum (IPC) — sursa INS
+                  Indice Prețuri Consum (IPC)
                 </th>
                 <th rowspan="2" style="vertical-align: bottom">
                   Total Brut<br />Realizat (lei)
@@ -954,10 +941,9 @@
           </table>
         </div>
         <div class="info-tip">
-          💡 <strong>IPC Lunar</strong> = indicele lunar publicat de INS (L față
-          de L-1), pre-completat din datele INS până în aprilie 2026. Se poate
-          edita și completa manual pentru lunile viitoare, pe măsura publicării
-          de INS.<br />
+          💡 <strong>IPC Lunar</strong> = indicele lunar publicat de INS până în
+          aprilie 2026. Se poate edita și completa manual pentru lunile
+          viitoare, pe măsura publicării de INS.<br />
           📐 <strong>IPC Cumulat</strong> = produsul în lanț al tuturor
           indicilor lunari de la luna respectivă până la ultima lună cu IPC
           disponibil (data interogării) — acesta este factorul corect de
@@ -1001,11 +987,6 @@
     </div>
 
     <script>
-      // ═══════════════════════════════════════════════════════════════
-      // IPC LUNAR DATE — sursa INS Romania (L față de L-1, %)
-      // Pre-completate conform comunicatelor de presă INS.
-      // Adăugați manual lunile viitoare la apariția comunicatelor INS.
-      // ═══════════════════════════════════════════════════════════════
       const IPC_LUNAR_DATA = {
         "2024-01": 101.1,
         "2024-02": 100.81,
@@ -1035,8 +1016,6 @@
         "2026-02": 100.59,
         "2026-03": 100.78,
         "2026-04": 100.84,
-        // Adăugați aici lunile viitoare după publicare INS:
-        // '2026-04': 100.xx,
       };
 
       const LUNI_RO = [
@@ -1057,9 +1036,6 @@
       const LS_KEY_PREFIX = "pensie_profil_";
       const LS_KEY_LAST = "pensie_lastProfile";
 
-      // ─────────────────────────────────────────────────────
-      // GENERATE MONTHS 2024-01 → 2030-12
-      // ─────────────────────────────────────────────────────
       function genereazaLuni() {
         const luni = [];
         for (let an = 2024; an <= 2030; an++)
@@ -1070,24 +1046,9 @@
 
       const TOATE_LUNILE = genereazaLuni();
       const brutValues = {};
-      const ipcLunarValues = {}; // IPC lunar (L/L-1) pentru fiecare lună — editabil
+      const ipcLunarValues = {};
       let activeProfileName = null;
 
-      // ═══════════════════════════════════════════════════════════════
-      // IPC CUMULAT — produs în lanț (conform reguli.txt și Legea 223)
-      //
-      // Logică: pentru luna X, IPC cumulat față de "data interogării"
-      // = produsul coeficienților IPC lunari din luna X+1 până la
-      // ultima lună pentru care există IPC în tabel.
-      //
-      // Exemplu: salariul din ian-2025, ultima lună cu IPC = mart-2026:
-      //   IPC_cumul(ian-2025) = IPC(feb-2025) × IPC(mar-2025) × ... × IPC(mar-2026)
-      //   Toți împărțiți la 100 => coeficienți zecimali, rezultat ×100 pentru %
-      //
-      // Luna curentă (ultima cu IPC) are IPC cumulat = 100.0000 (factor 1)
-      // ═══════════════════════════════════════════════════════════════
-
-      // Returnează sortată lista de chei cu IPC lunar disponibil
       function getKeysWithIpc() {
         return TOATE_LUNILE.filter((k) => {
           const v = ipcLunarValues[k];
@@ -1095,18 +1056,14 @@
         });
       }
 
-      // Calculează IPC cumulat pentru toate lunile și returnează un map key→ipcCumulat(%)
       function calcIpcCumulat() {
         const keysWithIpc = getKeysWithIpc();
         const result = {};
 
         if (keysWithIpc.length === 0) return result;
 
-        // Ultima lună cu IPC = luna de referință (simulează "data interogării")
         const lastKey = keysWithIpc[keysWithIpc.length - 1];
 
-        // Construim array de indici pentru toate lunile din TOATE_LUNILE care au IPC
-        // Indexul fiecărei chei în TOATE_LUNILE
         const keyIndex = {};
         TOATE_LUNILE.forEach((k, i) => {
           keyIndex[k] = i;
@@ -1114,18 +1071,14 @@
 
         const lastIdx = keyIndex[lastKey];
 
-        // Pentru fiecare lună cu IPC, calculăm produsul cumulat
-        // din luna URMĂTOARE ei până la lastKey (inclusiv)
         keysWithIpc.forEach((key) => {
           const idx = keyIndex[key];
 
           if (idx === lastIdx) {
-            // Ultima lună cu IPC: factor cumulat = 1 (100%)
             result[key] = 100.0;
             return;
           }
 
-          // Produsul coeficienților din luna idx+1 până la lastIdx (inclusiv)
           let prod = 1.0;
           for (let i = idx + 1; i <= lastIdx; i++) {
             const k = TOATE_LUNILE[i];
@@ -1133,22 +1086,19 @@
             if (v !== "" && v !== undefined && !isNaN(v) && v > 0) {
               prod *= v / 100.0;
             }
-            // Dacă o lună intermediară nu are IPC, o sărim (lanțul rămâne incomplet)
           }
-          // Întoarcem ca procent (×100)
+
           result[key] = parseFloat((prod * 100).toFixed(6));
         });
 
-        // Lunile fără IPC nu primesc valoare
         return result;
       }
 
-      // Map global care se recalculează la orice modificare IPC lunar
       let ipcCumulatMap = {};
 
       function recalcToateCumulate() {
         ipcCumulatMap = calcIpcCumulat();
-        // Actualizează afișarea IPC cumulat și salariu indexat pentru toate lunile
+
         TOATE_LUNILE.forEach((key) => {
           updateCumulCell(key);
           recalcIndexat(key);
@@ -1168,9 +1118,6 @@
         }
       }
 
-      // ─────────────────────────────────────────────────────
-      // BUILD TABLE
-      // ─────────────────────────────────────────────────────
       function buildTable() {
         const tbody = document.getElementById("tableBody");
         tbody.innerHTML = "";
@@ -1223,17 +1170,13 @@
           tbody.appendChild(row);
         });
 
-        // Calculează IPC cumulat inițial după ce toate rândurile sunt create
         recalcToateCumulate();
       }
 
-      // ─────────────────────────────────────────────────────
-      // CELL HANDLERS
-      // ─────────────────────────────────────────────────────
       function onIpcLunarChange(key, val) {
         const v = parseFloat(val);
         ipcLunarValues[key] = isNaN(v) ? "" : v;
-        // Orice modificare IPC lunar recalculează TOATE cumulatele și indexările
+
         recalcToateCumulate();
       }
 
@@ -1243,8 +1186,6 @@
         recalcIndexat(key);
       }
 
-      // Recalculează salariul indexat pentru o singură lună
-      // folosind IPC Cumulat (produsul în lanț) — nu IPC lunar individual
       function recalcIndexat(key) {
         const brut = brutValues[key];
         const ipcC = ipcCumulatMap[key]; // IPC cumulat în % (ex: 108.52)
@@ -1281,9 +1222,6 @@
         return `${LUNI_RO[parseInt(l) - 1]} ${an}`;
       }
 
-      // ─────────────────────────────────────────────────────
-      // CALCULATE
-      // ─────────────────────────────────────────────────────
       function getIndexedValues() {
         return TOATE_LUNILE.map((key) => {
           const span = document.getElementById(`idx-${key}`);
@@ -1356,7 +1294,6 @@
         const primaLuna = selectedMonths[0].key;
         const ultimaLuna = selectedMonths[selectedMonths.length - 1].key;
 
-        // Info despre luna de referință IPC
         const keysWithIpc = getKeysWithIpc();
         const lunaRefIpc =
           keysWithIpc.length > 0
@@ -1379,9 +1316,6 @@
         resultsEl.scrollIntoView({ behavior: "smooth", block: "start" });
       }
 
-      // ─────────────────────────────────────────────────────
-      // CLEAR TABLE
-      // ─────────────────────────────────────────────────────
       function stergeToateSalariile() {
         if (!confirm("Ștergeți toate salariile brute introduse?")) return;
         TOATE_LUNILE.forEach((key) => {
@@ -1398,9 +1332,6 @@
         updateActiveBar();
       }
 
-      // ─────────────────────────────────────────────────────
-      // LOCAL STORAGE — PROFILES
-      // ─────────────────────────────────────────────────────
       function getAllProfileNames() {
         const names = [];
         for (let i = 0; i < localStorage.length; i++) {
@@ -1471,7 +1402,6 @@
         }
       }
 
-      // ── Save Modal ──────────────────────────────────────
       function openSaveModal() {
         const nameInField = document
           .getElementById("profileNameInput")
@@ -1528,7 +1458,6 @@
         );
       }
 
-      // ── Load ────────────────────────────────────────────
       function incarcaProfil() {
         const sel = document.getElementById("profileSelect");
         const name = sel.value;
@@ -1566,7 +1495,6 @@
         }
       }
 
-      // ── Delete ──────────────────────────────────────────
       function stergeProfil() {
         const sel = document.getElementById("profileSelect");
         const name = sel.value;
@@ -1585,7 +1513,6 @@
         showStatus(`🗑 Profilul „${name}" a fost șters.`, "info");
       }
 
-      // ── Auto-load last profile on startup ──────────────
       function autoLoadLastProfile() {
         const lastName = localStorage.getItem(LS_KEY_LAST);
         if (!lastName) return;
@@ -1604,14 +1531,9 @@
             `📂 Profil „${lastName}" încărcat automat (salvat: ${savedAt}).`,
             "info",
           );
-        } catch (e) {
-          /* ignore corrupt data */
-        }
+        } catch (e) {}
       }
 
-      // ─────────────────────────────────────────────────────
-      // INIT
-      // ─────────────────────────────────────────────────────
       buildTable();
       refreshProfileSelect("");
       autoLoadLastProfile();
