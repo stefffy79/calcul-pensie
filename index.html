@@ -882,6 +882,35 @@
 
         <hr class="profile-divider" />
 
+        <div class="profile-save-row" style="margin-bottom: 12px">
+          <button
+            class="btn-profile btn-save"
+            style="background: var(--gold); color: #1a1209"
+            onclick="exportProfil()"
+          >
+            ⬇️ Export JSON
+          </button>
+          <label
+            class="btn-profile btn-load"
+            style="
+              background: var(--text3);
+              cursor: pointer;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            ⬆️ Import JSON
+            <input
+              type="file"
+              id="importFileInput"
+              accept=".json"
+              style="display: none"
+              onchange="importProfil(this)"
+            />
+          </label>
+        </div>
+
         <div class="profile-load-row">
           <select id="profileSelect">
             <option value="">— Selectați un profil salvat —</option>
@@ -1050,7 +1079,7 @@
         "2026-02": 100.59,
         "2026-03": 100.78,
         "2026-04": 100.84,
-        "2026-05": 100.58
+        "2026-05": 100.58,
       };
 
       const LUNI_RO = [
@@ -1567,6 +1596,100 @@
             "info",
           );
         } catch (e) {}
+      }
+
+      function exportProfil() {
+        const sel = document.getElementById("profileSelect");
+        const name = sel.value;
+        if (!name) {
+          showStatus("⚠️ Selectați un profil de exportat.", "err");
+          return;
+        }
+        const raw = localStorage.getItem(LS_KEY_PREFIX + name);
+        if (!raw) {
+          showStatus("⚠️ Profilul nu a fost găsit.", "err");
+          return;
+        }
+        const blob = new Blob([raw], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `pensie_${name.replace(/\s+/g, "_")}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showStatus(`⬇️ Profilul „${name}" a fost exportat.`, "ok");
+      }
+
+      function importProfil(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          try {
+            const data = JSON.parse(e.target.result);
+            if (!data.brutValues || typeof data.brutValues !== "object")
+              throw new Error("Format invalid");
+
+            const suggestedName = file.name
+              .replace(/^pensie_/, "")
+              .replace(/_/g, " ")
+              .replace(/\.json$/i, "")
+              .trim();
+            const name = prompt(
+              "Introduceți numele profilului importat:",
+              suggestedName || "",
+            );
+            if (!name || !name.trim()) {
+              showStatus(
+                "⚠️ Import anulat — numele profilului este obligatoriu.",
+                "err",
+              );
+              input.value = "";
+              return;
+            }
+            const trimmedName = name.trim();
+
+            const existing = getAllProfileNames().includes(trimmedName);
+            if (
+              existing &&
+              !confirm(
+                `Profilul „${trimmedName}" există deja. Suprascrieți datele?`,
+              )
+            ) {
+              input.value = "";
+              return;
+            }
+
+            const payload = JSON.stringify({
+              brutValues: data.brutValues,
+              savedAt: data.savedAt || new Date().toISOString(),
+            });
+            localStorage.setItem(LS_KEY_PREFIX + trimmedName, payload);
+            localStorage.setItem(LS_KEY_LAST, trimmedName);
+
+            applyBrutSnapshot(data.brutValues);
+            activeProfileName = trimmedName;
+            updateActiveBar();
+            refreshProfileSelect(trimmedName);
+            document.getElementById("results").classList.remove("visible");
+            document.querySelectorAll(".badge-best").forEach((b) => b.remove());
+            document
+              .querySelectorAll("tbody tr")
+              .forEach((r) => r.classList.remove("selected-month"));
+
+            showStatus(
+              `⬆️ Profilul „${trimmedName}" a fost importat și încărcat cu succes.`,
+              "ok",
+            );
+          } catch (err) {
+            showStatus(
+              "❌ Fișierul JSON nu este valid sau nu are formatul corect.",
+              "err",
+            );
+          }
+          input.value = "";
+        };
+        reader.readAsText(file);
       }
 
       buildTable();
